@@ -1,5 +1,4 @@
 
-import { imageListClasses } from '@mui/material';
 import { StyleSheet } from 'react-native';
 
 const styles = StyleSheet.create({
@@ -22,7 +21,15 @@ const styles = StyleSheet.create({
   image:{
     margin:30,
 
-  }
+  },
+  errorText: {
+    color: 'red',
+    marginTop: 4,
+  },
+  welcomeText: {
+    fontSize: 24,
+    marginBottom: 20,
+},
 });
 
 export default styles;
