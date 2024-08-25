@@ -1,25 +1,64 @@
 import { StatusBar } from 'expo-status-bar';
 import React ,{useState}from 'react';
-import {  View ,Text} from 'react-native';
+import {  View } from 'react-native';
 import { TextInput , Button , Avatar} from 'react-native-paper';
 import styles from '../styles';
 import { showToast } from '../../utils/toast';
-
-
-
+import axios from 'axios';
+import HomeScreen from './HomeScreen';
+import { useNavigation } from '@react-navigation/native';
 function LoginScreen(){
    
   const [userCode,setUserCode] = useState('');
   const [password,setPassword]=useState('');
 
+  const navigation = useNavigation();
 
-const handleLogin = ()=> {
-  if(validate())
+  const handleLogin = async () => {
+
+    if(validate())
     {
-      console.log('proceed');
+      
+      try {
+        // Make a GET request with query parameters
+       
+        const response = await axios.get('https://57b2-213-74-41-85.ngrok-free.app/users', {
+          params: {
+            userCode: userCode,
+            password: password
+          }
+        });
+        
+        // Check if any user matches the provided credentials
+        console.log(response.data);
+        let user=null;
+        if(Array.isArray(response.data))
+        {
+          user = response.data.find(user => user.userCode === userCode && user.password=== password)
+         
+        }
+
+        if (user) {
+    
+          showToast('success', 'Login Successful', 'You will be redirected shortly.');
+        setTimeout(() => {
+             navigation.navigate(HomeScreen);
+         }, 700);
+          
+      } else {
+        
+        showToast('error', 'Validation Error', 'Login Credentials Are Invalid');
+      }
+        // Check if response.data is an array
+        
+    } catch (error) {
+        console.error('Error fetching data:', error); // Log any errors
+      }
+      
+
     }
-  
-}
+
+  };
 
 const validate = () => {
   let result = true;
@@ -40,13 +79,14 @@ const validate = () => {
 }
 
     return(
+
         <View style={{  flex: 1,
             alignItems: 'center',
             justifyContent: 'center'
             
             }}>
 
-            <Avatar.Image style={styles.image} size={180} source={require('../../assets/images/toyota-market-logo.png')} />
+            <Avatar.Image style={styles.image} size={270} source={require('../../assets/images/toyota-market-logo.png')} />
 
 
         <TextInput 
