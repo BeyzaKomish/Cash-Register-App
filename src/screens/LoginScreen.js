@@ -1,18 +1,39 @@
 import { StatusBar } from 'expo-status-bar';
-import React ,{useState}from 'react';
-import {  View } from 'react-native';
+import React ,{useState,useEffect} from 'react';
+import {  View ,Vibration} from 'react-native';
 import { TextInput , Button , Avatar} from 'react-native-paper';
 import styles from '../styles';
 import { showToast } from '../../utils/toast';
 import axios from 'axios';
 import HomeScreen from './HomeScreen';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 function LoginScreen(){
    
   const [userCode,setUserCode] = useState('');
   const [password,setPassword]=useState('');
 
   const navigation = useNavigation();
+
+
+
+  useEffect(() => {
+    const checkUserSession = async () => {
+      try {
+        const user = await AsyncStorage.getItem('user');
+        if (user) {
+          navigation.navigate('HomeScreen');
+        }
+      } catch (error) {
+        console.error('Error checking user session:', error);
+      }
+    };
+    checkUserSession();
+  }, []);
+
+
+
 
   const handleLogin = async () => {
 
@@ -22,37 +43,39 @@ function LoginScreen(){
       try {
         // Make a GET request with query parameters
        
-        const response = await axios.get('https://57b2-213-74-41-85.ngrok-free.app/users', {
+        const response = await axios.get('https://40ef-2a00-1880-a000-6565-dd91-5ed1-82f6-7eef.ngrok-free.app/users', {
           params: {
             userCode: userCode,
             password: password
-          }
-        });
+          }        });
         
-        // Check if any user matches the provided credentials
-        console.log(response.data);
-        let user=null;
-        if(Array.isArray(response.data))
-        {
-          user = response.data.find(user => user.userCode === userCode && user.password=== password)
-         
-        }
+        console.log(response.data); // Inspect the API response
 
+    let user = null;
+    if (Array.isArray(response.data)) {
+         user = response.data.find(user => user.userCode === userCode && user.password === password);
+    } else {
+        console.error('API response is not an array:', response.data);
+    }
         if (user) {
-    
+
+
+          await AsyncStorage.setItem('user', JSON.stringify(user));
+
           showToast('success', 'Login Successful', 'You will be redirected shortly.');
-        setTimeout(() => {
-             navigation.navigate(HomeScreen);
-         }, 700);
-          
-      } else {
-        
-        showToast('error', 'Validation Error', 'Login Credentials Are Invalid');
-      }
-        // Check if response.data is an array
+
+          setTimeout(() => {
+            navigation.navigate(HomeScreen);
+          }, 700);
+
+        } else {
+          Vibration.vibrate(300);
+          showToast('error', 'Validation Error', 'Login Credentials Are Invalid');
+        }
+   
         
     } catch (error) {
-        console.error('Error fetching data:', error); // Log any errors
+        console.error('Error fetching data:', error); 
       }
       
 
@@ -65,12 +88,14 @@ const validate = () => {
 
   if (userCode.length ===0 ) {
     result= false;
+    Vibration.vibrate(300);
     showToast('error', 'Validation Error', 'User code is required.');
 
     }
 
     else if (password.length ===0 ) {
       result= false;
+      Vibration.vibrate(300);
       showToast('error', 'Validation Error', 'Password is required.');
   
       }
@@ -90,7 +115,7 @@ const validate = () => {
 
 
         <TextInput 
-
+            name="User-code"
             style={styles.input} 
             label="User-Code" 
             mode="outlined" 
@@ -105,7 +130,7 @@ const validate = () => {
 
 
       <TextInput 
-
+            name="password"
             style={styles.input} 
             label="Password" 
             mode="outlined" 
