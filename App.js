@@ -5,11 +5,14 @@ import LoginScreen from './src/screens/LoginScreen.js'
 import HomeScreen from './src/screens/HomeScreen'
 import 'react-native-gesture-handler'
 import Toast from 'react-native-toast-message';
-
+import {  CartProvider } from './src/screens/CartContext';
 const Stack = createNativeStackNavigator();
 
 export default function App() {
+
+
   return (
+    <CartProvider>
       <NavigationContainer>
           <Stack.Navigator initialRouteName="LoginScreen">
               <Stack.Screen name="LoginScreen" component={LoginScreen} />
@@ -18,7 +21,7 @@ export default function App() {
           </Stack.Navigator>
           <Toast/>
       </NavigationContainer>
+      </CartProvider>
   );
 }
 
-//i was plannning on using a json server to mock services but is this possible :Login Authentication Tutorial in React Native using AsyncStorage | useReducer, useContext, useMemo
